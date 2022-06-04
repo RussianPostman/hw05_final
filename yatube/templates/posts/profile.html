@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}    
+  Профайл пользователя {{ user.get_full_name }} 
+{% endblock %}
+{% block content %}          
+  <h1>Все посты пользователя {{ user.get_full_name }} </h1>
+  <h3>Всего постов: {{ author.posts.count }} </h3> 
+    {% if request.user != author %}
+      {% include 'posts/includes/subscribe_button.html' %} 
+    {% endif %}
+  {% with HIDE_AUTHOR_INFO=True %}
+
+    {% for post in page_obj %}
+      {% include 'includes/post_desk.html' %} 
+    {% endfor %}    
+    
+  {% endwith %}
+  {% include 'posts/includes/paginator.html' %}  
+{% endblock %}
