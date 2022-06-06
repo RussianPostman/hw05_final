@@ -25,8 +25,8 @@ class PostModelTest(TestCase):
         cls.authorized_client.force_login(cls.user)
 
         cls.client1 = User.objects.create_user(username='not_auth')
-        cls.authorized_client1 = Client()
-        cls.authorized_client1.force_login(cls.client1)
+        cls.authorized_client_1 = Client()
+        cls.authorized_client_1.force_login(cls.client1)
 
     def setUp(self):
         cache.clear()
@@ -43,6 +43,7 @@ class PostModelTest(TestCase):
         """Тестируем функционал не авторизованного клиента"""
         test_urls = {
             '/': HTTPStatus.OK,
+            '/follow/': HTTPStatus.FOUND,
             '/group/slug_test/': HTTPStatus.OK,
             '/profile/auth/': HTTPStatus.OK,
             '/posts/1/': HTTPStatus.OK,
@@ -51,12 +52,12 @@ class PostModelTest(TestCase):
         }
         for address, repons in test_urls.items():
             with self.subTest(address=address):
-                response = self.authorized_client.get(address)
+                response = self.guest_client.get(address)
                 self.assertEqual(response.status_code, repons)
 
     def test_not_authorized_client_redirect(self):
         """Тестируем редиректы анонима."""
-        test_urls = ['/create/', '/posts/1/edit/']
+        test_urls = ('/create/', '/posts/1/edit/', '/follow/')
         for address in test_urls:
             with self.subTest(address=address):
                 response = self.guest_client.get(address, follow=True)
@@ -64,9 +65,10 @@ class PostModelTest(TestCase):
                     response, f'/auth/login/?next={address}')
 
     def test_authorized_client_redirect(self):
-        """Ткст попытки редактирования поста не автором"""
+        """Текст попытки редактирования поста не автором"""
 
-        response = self.authorized_client1.get('/posts/1/edit/', follow=True)
+        response = self.authorized_client_1.get('/posts/1/edit/', follow=True)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(
             response, (reverse('posts:post_detail',
                                kwargs={'post_id': '1'})))
@@ -80,6 +82,7 @@ class PostModelTest(TestCase):
             '/posts/1/': 'posts/post_detail.html',
             '/create/': 'posts/create_post.html',
             '/posts/1/edit/': 'posts/create_post.html',
+            '/follow/': 'posts/follow.html',
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):
@@ -88,7 +91,7 @@ class PostModelTest(TestCase):
 
 
 class StaticURLTests(TestCase):
-    """Сестируем пейджинатор"""
+    """Туытируем статичные страницы"""
     def test_homepage(self):
         guest_client = Client()
         response = guest_client.get('/')

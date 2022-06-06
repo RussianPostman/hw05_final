@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load cache %}
 {% block title %}Последние обновления на сайте{% endblock %}
-{% cache 20 index_page %}
+{% cache 20 follow_page request.user.username %}
   {% block content %}
-    {% include 'posts/includes/switcher.html' %}
+    {% with follow=True %}
+      {% include 'posts/includes/switcher.html' %} 
+    {% endwith %}
     <h1> Избранные авторы </h1> 
     {% for post in page_obj %}
       {% include 'includes/post_desk.html' %}

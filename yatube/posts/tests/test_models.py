@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..models import Group, Post, User
+from ..models import Group, Post, User, Comment
 
 
 class PostModelTest(TestCase):
@@ -41,3 +41,31 @@ class GroupModelTest(TestCase):
         self.assertEqual(str(clas_obj),
                          expected_title,
                          'slomalsa __str__ group')
+
+
+class CommentModelTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='auth')
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Стоит сделать подлиннее текст, чтобы было видно,'
+                 ' что действительно корректно все работает',
+        )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='zdiughzdlfiuhbzdfibthnshsnfnan'
+        )
+        User.objects.create_superuser(username='admin',
+                                      email='admin@decent.mark',
+                                      password='password')
+
+    def test_verbose_name_plural(self):
+        """Тестируем verbose_name модели Comment."""
+        comment = Comment.objects.get(id=1)
+        verbose_name = comment._meta.verbose_name
+        verbose_name_plural = comment._meta.verbose_name_plural
+        self.assertEquals(verbose_name, 'Комментарий')
+        self.assertEquals(verbose_name_plural, 'Комментарии')

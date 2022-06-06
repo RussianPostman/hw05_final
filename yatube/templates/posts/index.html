@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load cache %}
 {% block title %}Последние обновления на сайте{% endblock %}
-{% cache 20 index_page %}
+{% cache 20 index_page request.user.username %}
   {% block content %}
-  {% include 'posts/includes/switcher.html' %} 
+  {% with index=True %}
+    {% include 'posts/includes/switcher.html' %} 
+  {% endwith %}
   <h1>Последние публикации на сайте </h1> 
     {% for post in page_obj %}
       {% include 'includes/post_desk.html' %}

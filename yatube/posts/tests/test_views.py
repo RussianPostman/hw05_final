@@ -54,6 +54,11 @@ class PostModelTest(TestCase):
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
+        user_2 = User.objects.create_user(username='follower')
+        cls.follower_client = Client()
+        cls.follower_client.force_login(user_2)
+        Follow.objects.create(user=user_2, author=cls.user)
+
     def setUp(self):
         cache.clear()
 
@@ -92,10 +97,11 @@ class PostModelTest(TestCase):
             'posts:index': None,
             'posts:group_list': {'slug': 'slug_test'},
             'posts:profile': {'username': 'auth'},
+            'posts:follow_index': None,
         }
         for url_name, data in views_names.items():
             with self.subTest(url_name=url_name, data=data):
-                response = self.authorized_client.get(
+                response = self.follower_client.get(
                     reverse(url_name, kwargs=data))
                 self.assertEqual(
                     response.context['page_obj'][0].author, self.post.author)
@@ -178,30 +184,22 @@ class PostModelTest(TestCase):
 
     def test_cache_index(self):
         """Тестируем использование подписок"""
-        user = User.objects.create_user(username='follower')
-        follower_client = Client()
-        follower_client.force_login(user)
         follow_count = Follow.objects.count()
         url_list = (
-            ('posts:profile_follow', (self.user.username,), 1),
-            ('posts:profile_unfollow', (self.user.username,), 0),
+            ('posts:profile_follow', (self.user.username,), 2),
+            ('posts:profile_unfollow', (self.user.username,), 1),
         )
         for url_name, url_data, arithmetic_data in url_list:
             with self.subTest(url_name=url_name, url_data=url_data):
-                follower_client.get(
+                self.follower_client.get(
                     reverse(url_name, args=url_data))
                 self.assertEqual(Follow.objects.count(),
                                  follow_count + int(arithmetic_data))
 
     def test_cache_index(self):
         """Тестируем использование подписок"""
-        user = User.objects.create_user(username='follower')
-        follower_client = Client()
-        follower_client.force_login(user)
-        author = self.user
-        Follow.objects.create(user=user, author=author)
         user_list = (
-            (follower_client, 1),
+            (self.follower_client, 1),
             (self.authorized_client, 0)
         )
         for user_name, test_data in user_list:

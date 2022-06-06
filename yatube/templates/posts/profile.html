@@ -5,7 +5,7 @@
 {% block content %}          
   <h1>Все посты пользователя {{ user.get_full_name }} </h1>
   <h3>Всего постов: {{ author.posts.count }} </h3> 
-    {% if request.user != author %}
+    {% if request.user != author and request.user.is_authenticated %}
       {% include 'posts/includes/subscribe_button.html' %} 
     {% endif %}
   {% with HIDE_AUTHOR_INFO=True %}
