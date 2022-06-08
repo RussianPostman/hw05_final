@@ -58,9 +58,6 @@ class CommentModelTest(TestCase):
             author=cls.user,
             text='zdiughzdlfiuhbzdfibthnshsnfnan'
         )
-        User.objects.create_superuser(username='admin',
-                                      email='admin@decent.mark',
-                                      password='password')
 
     def test_verbose_name_plural(self):
         """Тестируем verbose_name модели Comment."""

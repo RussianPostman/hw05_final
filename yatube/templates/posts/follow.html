@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load cache %}
 {% block title %}Последние обновления на сайте{% endblock %}
-{% cache 20 index_page %}
+{% cache 20 follow_page with page_obj %}
   {% block content %}
     {% with follow=True %}
       {% include 'posts/includes/switcher.html' %} 

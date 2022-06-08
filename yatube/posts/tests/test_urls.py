@@ -33,7 +33,7 @@ class PostModelTest(TestCase):
 
     def test_authorized_client_url(self):
         """Тестируем функционал авторизованного клиента"""
-        test_urls = ('/create/', '/posts/1/edit/')
+        test_urls = ('/create/', '/posts/1/edit/', '/follow/')
         for address in test_urls:
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
